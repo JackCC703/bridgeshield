@@ -1,0 +1,48 @@
+{
+  "name": "@bridgeshield/sdk",
+  "version": "0.0.0",
+  "description": "Official SDK for BridgeShield AML Gateway - Check addresses, submit appeals, and integrate LI.FI compliance",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "aml",
+    "kyc",
+    "blockchain",
+    "defi",
+    "lifinance",
+    "li-fi",
+    "compliance",
+    "sanctions",
+    "cryptocurrency"
+  ],
+  "author": "BridgeShield",
+  "license": "MIT",
+  "peerDependencies": {
+    "typescript": ">=5.0.0"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0"
+  }
+}
