@@ -1,24 +1,46 @@
 # BridgeShield — AML Gateway for LI.FI Cross-Chain Trades
 
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/easyshellworld/bridgeshield/blob/main/LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/easyshellworld/bridgeshield/pulls)
+[![GitHub Repo stars](https://img.shields.io/github/stars/easyshellworld/bridgeshield?style=social)](https://github.com/easyshellworld/bridgeshield/stargazers)
+[![Open Issues](https://img.shields.io/github/issues/easyshellworld/bridgeshield)](https://github.com/easyshellworld/bridgeshield/issues)
+[![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed/easyshellworld/bridgeshield)](https://github.com/easyshellworld/bridgeshield/pulls?q=is%3Apr+is%3Aclosed)
+[![Last Commit](https://img.shields.io/github/last-commit/easyshellworld/bridgeshield)](https://github.com/easyshellworld/bridgeshield/commits/main)
+
+[![Node.js](https://img.shields.io/badge/Node.js-20+-339933?logo=node.js)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178C6?logo=typescript)](https://www.typescriptlang.org/)
+[![Express](https://img.shields.io/badge/Express-4.x-000000?logo=express)](https://expressjs.com/)
+[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)](https://react.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.0+-06B6D4?logo=tailwindcss)](https://tailwindcss.com/)
+[![Prisma](https://img.shields.io/badge/Prisma-5.x-5A67D8?logo=prisma)](https://prisma.io/)
+[![Vitest](https://img.shields.io/badge/Vitest-1.x-6B9DF8?logo=vitest)](https://vitest.io/)
+
+[![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?logo=githubactions)](https://github.com/easyshellworld/bridgeshield/actions)
+[![Tests](https://img.shields.io/badge/tests-88%20%2B%2021-brightgreen)](https://github.com/easyshellworld/bridgeshield/actions)
+[![Docker Ready](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker)](https://www.docker.com/)
+
 BridgeShield is an Anti-Money Laundering (AML) compliance gateway designed specifically for cross-chain trading platforms like LI.FI. It provides real-time risk assessment, transaction monitoring, and regulatory compliance for decentralized finance (DeFi) transactions.
 
 ## 🏗️ Architecture
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│                 │    │                 │    │                 │
-│  Frontend Demo  │    │   Backend API   │    │ Frontend Admin  │
-│  (Port: 5173)   │◄───┤   (Port: 3000)  │───►│  (Port: 5174)   │
-│                 │    │                 │    │                 │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-        │                       │                       │
-        │                       │                       │
-        ▼                       ▼                       ▼
-┌─────────────────────────────────────────────────────────────┐
-│                                                             │
-│                    Docker Compose                           │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────┐
+│                                                                         │
+│   ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐  │
+│   │                 │    │                 │    │                 │  │
+│   │  Frontend Demo  │    │   Backend API   │    │ Frontend Admin  │  │
+│   │  (Port: 5173)   │◄───┤   (Port: 3000)  │───►│  (Port: 5174)   │  │
+│   │                 │    │                 │    │                 │  │
+│   └─────────────────┘    └─────────────────┘    └─────────────────┘  │
+│                                    │                                  │
+│                                    ▼                                  │
+│                          ┌─────────────────┐                          │
+│                          │   SDK Package  │                          │
+│                          │ @bridgeshield/ │                          │
+│                          │      sdk       │                          │
+│                          └─────────────────┘                          │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
 ## 🚀 Quick Start
@@ -27,7 +49,7 @@ BridgeShield is an Anti-Money Laundering (AML) compliance gateway designed speci
 
 1. **Clone the repository:**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/easyshellworld/bridgeshield
    cd bridgeshield
    ```
 
@@ -55,6 +77,32 @@ For hot-reload during development:
 docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 ```
 
+## 📦 SDK Package
+
+For easy integration into your own applications:
+
+```bash
+npm install @bridgeshield/sdk
+```
+
+```typescript
+import { BridgeShieldClient } from '@bridgeshield/sdk';
+
+const client = new BridgeShieldClient({
+  baseUrl: 'https://api.bridgeshield.io',
+});
+
+const result = await client.checkAddress({
+  address: '0x1234567890abcdef1234567890abcdef12345678',
+  chainId: 1,
+});
+
+console.log(result.riskLevel); // 'LOW' | 'MEDIUM' | 'HIGH'
+console.log(result.decision);  // 'ALLOW' | 'REVIEW' | 'BLOCK'
+```
+
+See [packages/sdk/README.md](packages/sdk/README.md) for full documentation.
+
 ## 📁 Project Structure
 
 ```
@@ -62,16 +110,23 @@ bridgeshield/
 ├── backend/                 # Node.js/TypeScript backend API
 │   ├── src/                # Source code
 │   ├── prisma/             # Database schema and migrations
-│   ├── Dockerfile          # Production Dockerfile
+│   ├── tests/              # Unit and integration tests
+│   ├── Dockerfile           # Production Dockerfile
 │   └── package.json
 ├── frontend-demo/          # Demo interface for users
-│   ├── src/                # Vue.js/TypeScript source
-│   ├── Dockerfile          # Production Dockerfile
+│   ├── src/                # React/TypeScript source
+│   ├── Dockerfile           # Production Dockerfile
 │   └── package.json
 ├── frontend-admin/         # Admin dashboard
-│   ├── src/                # Vue.js/TypeScript source
-│   ├── Dockerfile          # Production Dockerfile
+│   ├── src/                # React/TypeScript source
+│   ├── Dockerfile           # Production Dockerfile
 │   └── package.json
+├── packages/
+│   └── sdk/                 # @bridgeshield/sdk npm package
+│       ├── src/             # TypeScript source
+│       ├── __tests__/       # Unit tests
+│       ├── README.md        # SDK documentation
+│       └── package.json
 ├── docker-compose.yml      # Production services
 ├── docker-compose.dev.yml  # Development overrides
 └── README.md               # This file
@@ -142,63 +197,93 @@ bridgeshield/
    npm run dev
    ```
 
+### SDK Development
+
+1. **Navigate to SDK directory:**
+   ```bash
+   cd packages/sdk
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Build:**
+   ```bash
+   npm run build
+   ```
+
+4. **Run tests:**
+   ```bash
+   npm test
+   ```
+
 ## 🌐 API Endpoints
 
-### Core API (Port 3000)
+### Core AML API (Port 3000)
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/v1/health` | Health check |
-| GET | `/api/v1/docs` | OpenAPI documentation |
-| POST | `/api/v1/transactions/analyze` | Analyze transaction for AML risks |
-| GET | `/api/v1/transactions/:id` | Get transaction details |
-| GET | `/api/v1/transactions` | List transactions with filtering |
-| POST | `/api/v1/addresses/check` | Check wallet address against risk databases |
-| GET | `/api/v1/addresses/:address` | Get address risk profile |
-| GET | `/api/v1/compliance/rules` | List active compliance rules |
-| POST | `/api/v1/compliance/rules` | Create new compliance rule |
-| GET | `/api/v1/reports/risk-summary` | Generate risk summary report |
+| GET | `/api/v1/health` | Health check with service status |
+| POST | `/api/v1/aml/check` | Check address risk score |
+| GET | `/api/v1/aml/whitelist` | Get whitelist summary |
+| POST | `/api/v1/aml/appeal` | Submit appeal for flagged address |
+| GET | `/api/v1/aml/appeal/status/:ticketId` | Check appeal status |
 
-### WebSocket Endpoints
+### Admin API (Port 3000)
 
-- `/ws/transactions` - Real-time transaction monitoring
-- `/ws/alerts` - Compliance alert notifications
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/admin/dashboard/stats` | Dashboard statistics |
+| GET | `/api/v1/admin/dashboard/risk-trend` | 7-day risk trend |
+| GET | `/api/v1/admin/dashboard/risk-distribution` | Risk level distribution |
+| GET | `/api/v1/admin/appeals` | List all appeals |
+| POST | `/api/v1/admin/appeal/:id/approve` | Approve appeal |
+| POST | `/api/v1/admin/appeal/:id/reject` | Reject appeal |
+| GET | `/api/v1/admin/whitelist` | List whitelist entries |
+| POST | `/api/v1/admin/whitelist` | Add to whitelist |
+| DELETE | `/api/v1/admin/whitelist/:id` | Remove from whitelist |
+| GET | `/api/v1/admin/logs` | View check logs |
 
 ## 🛡️ Features
 
 ### Risk Assessment
 - **Wallet Screening:** Check addresses against OFAC, UN, EU sanctions lists
-- **Transaction Pattern Analysis:** Detect suspicious transaction patterns
-- **Cross-chain Tracking:** Monitor fund flows across multiple blockchains
-- **Risk Scoring:** Assign risk scores based on multiple factors
+- **Real-time Scoring:** Risk score 0-100 with HIGH/MEDIUM/LOW classification
+- **Risk Factors:** Detailed breakdown of risk indicators
+- **Caching:** Multi-tier in-memory caching with TTL
 
 ### Compliance Tools
-- **Custom Rules Engine:** Define custom compliance rules
-- **Audit Trail:** Comprehensive logging of all compliance decisions
-- **Report Generation:** Generate regulatory compliance reports
-- **Alert System:** Real-time alerts for high-risk transactions
+- **Appeal System:** Users can contest flagged addresses
+- **Whitelist Management:** Admin can manage permanent whitelists
+- **Audit Trail:** Complete logging of all checks and decisions
+- **Transaction Monitoring:** Track checked transactions
 
-### Integration
-- **LI.FI Compatible:** Designed specifically for LI.FI cross-chain transactions
-- **REST API:** Full-featured API for integration with other systems
-- **WebSocket Support:** Real-time updates and notifications
+### Integration Options
+- **REST API:** Full-featured API for direct integration
+- **@bridgeshield/sdk:** Official JavaScript/TypeScript SDK
+- **Demo Frontend:** Working example with React
+- **Admin Dashboard:** Admin panel for managing whitelist and appeals
 
 ## 🧪 Testing
 
 ### Backend Tests
 ```bash
 cd backend
-npm test           # Run unit tests
-npm run test:e2e   # Run end-to-end tests
+npm test           # Run all tests (88 tests)
 ```
 
-### Frontend Tests
+### SDK Tests
 ```bash
-cd frontend-demo
-npm test           # Run component tests
+cd packages/sdk
+npm test           # Run SDK tests (21 tests)
+```
 
-cd ../frontend-admin
-npm test           # Run component tests
+### Frontend Builds
+```bash
+cd frontend-demo && npm run build
+cd frontend-admin && npm run build
 ```
 
 ## 🐳 Docker Commands
@@ -236,40 +321,33 @@ docker-compose logs -f backend
 ## 🔐 Security
 
 ### Environment Variables
-- `DATABASE_URL`: PostgreSQL connection string
-- `JWT_SECRET`: Secret for JWT token generation
-- `SANCTIONS_API_KEY`: API key for sanctions list checking
+- `DATABASE_URL`: SQLite/PostgreSQL connection string
 - `LOG_LEVEL`: Logging level (debug, info, warn, error)
 
-### Security Best Practices
-- All API endpoints require authentication
-- Sensitive data is encrypted at rest
-- Regular security audits and dependency updates
+### Security Features
 - Rate limiting on public endpoints
+- Input validation on all endpoints
+- Helmet security headers
+- CORS configuration
+- Parameterized queries (Prisma)
 
 ## 📊 Tech Stack
 
 | Component | Technology |
 |-----------|------------|
 | **Backend** | Node.js, TypeScript, Express, Prisma |
-| **Database** | SQLite (development), PostgreSQL (production) |
-| **Frontend** | Vue.js 3, TypeScript, Vite, Tailwind CSS |
+| **Database** | SQLite (dev), PostgreSQL (prod) |
+| **Frontend** | React 18, TypeScript, Vite, Tailwind CSS |
+| **SDK** | TypeScript, tsup (ESM + CJS) |
 | **Container** | Docker, Docker Compose |
-| **API** | REST, WebSocket, OpenAPI/Swagger |
-| **Testing** | Jest, Vitest, Supertest |
+| **Testing** | Vitest, Supertest |
 | **Monitoring** | Winston logging, Health checks |
 
 ## 📈 Monitoring & Logging
 
 ### Health Checks
 - Backend: `GET http://localhost:3000/api/v1/health`
-- Returns service status and uptime
-
-### Logging Levels
-- `DEBUG`: Detailed debugging information
-- `INFO`: General operational information
-- `WARN`: Warning conditions
-- `ERROR`: Error conditions
+- Returns service status, uptime, and dependency health
 
 ### View Logs
 ```bash
@@ -280,7 +358,7 @@ docker-compose logs
 docker-compose logs backend
 
 # Follow logs in real-time
-docker-compose logs -f
+docker-compose logs -f backend
 ```
 
 ## 🔄 Development Workflow
@@ -322,14 +400,10 @@ docker-compose logs --tail=100
 
 ## 📄 License
 
-MIT License - see LICENSE file for details.
+MIT License - see [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
 - **LI.FI** for cross-chain transaction infrastructure
-- **Vue.js** and **TypeScript** communities
+- **React** and **TypeScript** communities
 - **Open-source contributors** to all dependencies
-
----
-
-**BridgeShield** is developed with ❤️ for secure and compliant DeFi transactions.

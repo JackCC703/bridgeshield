@@ -2,6 +2,75 @@
 
 ---
 
+## 2026-04-10 — v0.0.4 新增 @bridgeshield/sdk 包
+
+### 概述
+新增官方 SDK 包，方便外部应用集成 BridgeShield AML API。
+
+### 变更内容
+
+**packages/sdk/ — 新增 SDK 包**
+- `BridgeShieldClient` 类：封装所有 API 调用
+- `checkAddress()` — 地址风险检查
+- `submitAppeal()` — 提交申诉
+- `getAppealStatus()` — 查询申诉状态
+- `getWhitelistSummary()` — 白名单摘要
+- `healthCheck()` — 健康检查
+
+**SDK 类型定义 (`packages/sdk/src/types.ts`)**
+- 完整 TypeScript 类型定义
+- 错误类层次结构：`BridgeShieldError` → `ApiError`、`NetworkError`、`ValidationError`
+- 所有请求/响应类型
+
+**SDK 测试 (`packages/sdk/__tests__/client.test.ts`)**
+- 21 个单元测试用例
+- 覆盖所有 API 方法
+- 覆盖错误处理路径
+
+**SDK 文档 (`packages/sdk/README.md`)**
+- 完整使用文档
+- API 参考
+- 错误处理指南
+- 代码示例
+
+### 构建验证
+| 子项目 | `npm run build` | `npm test` |
+|--------|-----------------|------------|
+| SDK | ✅ 通过 | ✅ 21/21 |
+
+---
+
+## 2026-04-10 — v0.0.3 前后端分级错误处理
+
+### 概述
+实现分级错误处理策略：4xx 客户端错误直接抛出，5xx/网络错误降级到 mock 数据，防止错误被静默隐藏。
+
+### 变更内容
+
+**Frontend Demo — API 客户端 (`frontend-demo/src/api/bridgeshield.ts`)**
+- `checkAddress`：4xx 错误直接抛出，5xx/网络错误 fallback 到 mock
+- `submitAppeal`：错误时返回 `{ success: false, error }` 而非伪装成功
+- fallback 时附带明确提示信息
+
+**Frontend Admin — API 客户端 (`frontend-admin/src/api/admin-api.ts`)**
+- `apiFetch`：4xx 错误抛出（console.error），5xx/网络错误返回 mock 数据（console.warn）
+- 所有 Admin 页面支持错误状态展示
+
+### 错误处理策略
+| 错误类型 | Demo 前端 | Admin 前端 |
+|----------|-----------|------------|
+| 4xx (输入错误) | 直接抛出 | 抛出 + console.error |
+| 5xx (服务器错误) | Fallback + 提示 | Mock 数据 + console.warn |
+| 网络/超时错误 | Fallback + 提示 | Mock 数据 + console.warn |
+
+### 构建验证
+| 子项目 | `npm run build` | `npm test` |
+|--------|-----------------|------------|
+| Frontend Demo | ✅ 通过 | — |
+| Frontend Admin | ✅ 通过 | — |
+
+---
+
 ## 2026-04-10 — v0.0.2 修复申诉流转与后台管理问题
 
 ### 概述
