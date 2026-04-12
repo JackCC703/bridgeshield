@@ -1,4 +1,4 @@
-import { Appeal, WhitelistEntry, CheckLog, DashboardStats, RiskTrendDay, RiskDistributionItem } from '../types';
+import { Appeal, WhitelistEntry, CheckLog, DashboardStats, RiskTrendDay, RiskDistributionItem, TransferHistoryItem, TransferHistoryResponse } from '../types';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
 
@@ -234,6 +234,41 @@ function getMockData(endpoint: string, method: string): any {
     return logs;
   }
 
+  // Transfer history
+  if (endpoint.startsWith('/api/v1/analytics/transfers') && method === 'GET') {
+    const transfers: TransferHistoryItem[] = [];
+    const chains = [1, 10, 42161, 137];
+    const statuses = ['SUCCESS', 'FAILED', 'PENDING'];
+    
+    for (let i = 0; i < 20; i++) {
+      const fromChain = chains[Math.floor(Math.random() * chains.length)];
+      const toChain = chains[Math.floor(Math.random() * chains.length)];
+      
+      transfers.push({
+        id: `transfer-${i}`,
+        fromAddress: `0x${Math.random().toString(16).substring(2, 42)}`,
+        toAddress: `0x${Math.random().toString(16).substring(2, 42)}`,
+        fromChain,
+        toChain,
+        amount: (Math.random() * 10).toFixed(6),
+        amountUsd: Math.random() > 0.3 ? Math.random() * 15000 : undefined,
+        status: statuses[Math.floor(Math.random() * statuses.length)],
+        timestamp: new Date(Date.now() - Math.random() * 30 * 86400000).toISOString(),
+        txHash: Math.random() > 0.2 ? `0x${Math.random().toString(16).substring(2, 66)}` : undefined,
+        feeAmount: Math.random() > 0.5 ? (Math.random() * 0.1).toFixed(6) : undefined,
+        feeToken: Math.random() > 0.5 ? 'ETH' : undefined,
+      });
+    }
+    
+    return {
+      transfers,
+      hasNext: Math.random() > 0.5,
+      hasPrevious: false,
+      next: Math.random() > 0.7 ? 'cursor_next_123' : null,
+      previous: null,
+    } as TransferHistoryResponse;
+  }
+
   return {};
 }
 
@@ -264,4 +299,7 @@ export const adminApi = {
     apiFetch(`/api/v1/admin/whitelist/${id}`, { method: 'DELETE' }),
 
   getLogs: () => apiFetch<CheckLog[]>('/api/v1/admin/logs'),
+
+  getTransferHistory: (wallet: string, params?: { status?: string; fromTime?: string; toTime?: string; limit?: number; cursor?: string }) => 
+    apiFetch<TransferHistoryResponse>(`/api/v1/analytics/transfers?wallet=${encodeURIComponent(wallet)}${params?.status ? `&status=${params.status}` : ''}${params?.fromTime ? `&fromTime=${params.fromTime}` : ''}${params?.toTime ? `&toTime=${params.toTime}` : ''}${params?.limit ? `&limit=${params.limit}` : ''}${params?.cursor ? `&cursor=${params.cursor}` : ''}`),
 };

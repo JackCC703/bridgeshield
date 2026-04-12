@@ -2,6 +2,82 @@
 
 ---
 
+## 2026-04-12 — v0.0.6 LI.FI Analytics 交易历史集成
+
+### 概述
+LI.FI Analytics API 集成增强 AML 风控：合并重复 API URL，交易历史流入 behavior-analyzer，新增 LI.FI 风险信号检测。
+
+### 变更内容
+
+**Backend — API URL 合并**
+- 合并 `COMPOSER_API_BASE_URL` + `ANALYTICS_API_BASE_URL` → `LI_FI_API_BASE_URL`
+- `.env.example` / `.env` 更新为 `LI_FI_API_BASE_URL=https://li.quest`
+- `composer.ts` / `analytics-service.ts` 使用统一环境变量
+- 向后兼容：fallback 到旧环境变量
+
+**Backend — Analytics 路由 (`src/api/routes/analytics.ts`)**
+- `GET /api/v1/analytics/transfers` — 代理 LI.FI Analytics API
+- 支持分页（cursor-based）、过滤（status, fromChain, toChain, fromTime, toTime）
+- 返回 `_bridgeShield` 元数据标记
+- 作为调查端点保留（供人工审核使用）
+
+**Backend — Analytics Service (`src/services/analytics-service.ts`)**
+- `fetchTransfers()` — 获取 LI.FI transfers 数据
+- `transformResponse()` — 转换为内部格式
+- `queryLocalTransfers()` — 本地 checkLog fallback
+- `getRateLimitInfo()` — 限流信息
+- 15 分钟 TTL 缓存
+
+**Backend — Behavior Analyzer 增强 (`src/services/behavior-analyzer.ts`)**
+- `calculateProfile()` 新增 `lifiHistory` 参数
+- **LI.FI 风险信号检测**:
+  - +25 分：高风险地址交互（与黑客/混币器地址交易）
+  - +15 分：首次 LI.FI 交易为高价值
+  - +12 分：跨链 tumblng 模式检测
+  - +10 分：金额 spike vs LI.FI 历史平均
+  - +8 分：高链多样性（≥8 条链）
+- `lifiSignals` 数组：记录 LI.FI 触发的风险信号
+- `metrics.lifiHistoryFallback`：LI.FI 数据不可用时标记
+- **置信度提升**：有 LI.FI 数据时 confidence 提升到 HIGH
+
+**Backend — 验证器 (`src/api/middleware/validator.ts`)**
+- `validateAnalyticsTransfersInput()` — 验证 wallet 参数
+- `analyticsTransfersValidator` — 中间件
+
+**Backend — app.ts 路由注册**
+- `app.use('/api/v1/analytics', analyticsRouter)`
+
+**Frontend — API 客户端**
+- `frontend-demo/src/api/bridgeshield.ts` — 新增 `getTransferHistory()` + 类型
+- `frontend-admin/src/api/admin-api.ts` — 新增 `getTransferHistory()` + 类型
+
+**README.md — 新增 LI.FI Analytics 说明**
+- 环境变量文档更新（`LI_FI_API_BASE_URL`）
+- API 端点表格新增 `/analytics/transfers`
+- Features 部分新增 LI.FI 增强风险信号说明
+
+### 新增 API 端点
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/analytics/transfers` | LI.FI 跨链交易历史（调查端点） |
+
+### 测试覆盖
+| 测试文件 | 数量 |
+|----------|------|
+| `behavior-analyzer-lifi.test.ts` | 9 个 LI.FI 增强测试 |
+| `analytics-service.test.ts` | 10 个服务测试 |
+| `analytics.test.ts` | 10 个集成测试 |
+| 现有回归测试 | 104 个 |
+
+### 构建验证
+| 子项目 | `npm run build` | `npm test` |
+|--------|-----------------|------------|
+| Backend | ✅ 通过 | ✅ 133/133 |
+| Frontend Demo | ✅ 通过 | — |
+| Frontend Admin | ✅ 通过 | — |
+
+---
+
 ## 2026-04-11 — v0.0.5 Earn API + Composer + 行为分析
 
 ### 概述

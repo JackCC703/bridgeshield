@@ -257,6 +257,23 @@ bridgeshield/
 | GET | `/api/v1/earn/portfolio/:wallet` | Proxy wallet portfolio positions |
 | GET | `/api/v1/composer/quote` | AML-gated Composer quote (`BLOCK`/`REVIEW`/`ALLOW`) |
 | GET | `/api/v1/behavior/profile/:wallet` | C-end wallet behavior profile and anomaly signals |
+| GET | `/api/v1/analytics/transfers` | LI.FI cross-chain transaction history for investigation |
+
+### LI.FI Analytics Integration
+
+BridgeShield enhances AML decision-making by integrating **LI.FI Analytics API** for cross-chain transaction history:
+
+```
+Address Check → [LI.FI Analytics History] + [Local checkLog] → Enhanced Behavior Analysis → AML Decision
+```
+
+**Enhanced Risk Signals from LI.FI:**
+- **High-risk address interactions** — Detects if the address has transacted with known mixer/sanctioned addresses
+- **Cross-chain tumbling patterns** — Identifies suspicious chain-hopping behavior
+- **Amount spike detection** — Compares current transaction against LI.FI historical averages
+- **First-time LI.FI user high-value detection** — Flags new addresses with large transactions
+
+**Combined Confidence:** When both local BridgeShield history and LI.FI history are available, behavior analysis confidence increases to HIGH.
 
 ## 🛡️ Features
 
@@ -265,7 +282,10 @@ bridgeshield/
 - **Real-time Scoring:** Risk score 0-100 with HIGH/MEDIUM/LOW classification
 - **Risk Factors:** Detailed breakdown of risk indicators
 - **Caching:** Multi-tier in-memory caching with TTL
-- **Behavior Analytics:** C-end behavior anomaly detection (velocity, chain novelty, amount spikes, decision drift)
+- **Behavior Analytics:** C-end behavior anomaly detection enhanced with LI.FI cross-chain history
+  - Local checkLog history for BridgeShield-observed transactions
+  - LI.FI Analytics API for complete cross-chain transaction history
+  - Combined signals: velocity, chain novelty, amount spikes, decision drift, high-risk interactions
 
 ### Compliance Tools
 - **Appeal System:** Users can contest flagged addresses
@@ -337,7 +357,7 @@ docker-compose logs -f backend
 - `DATABASE_URL`: SQLite/PostgreSQL connection string
 - `LOG_LEVEL`: Logging level (debug, info, warn, error)
 - `EARN_DATA_API_BASE_URL`: Earn Data API base URL (default: `https://earn.li.fi`)
-- `COMPOSER_API_BASE_URL`: Composer API base URL (default: `https://li.quest`)
+- `LI_FI_API_BASE_URL`: LI.FI API base URL (Composer + Analytics, default: `https://li.quest`)
 - `COMPOSER_API_KEY`: LI.FI Partner Portal API key (required for Composer quote route)
 - `BEHAVIOR_*`: Thresholds for C-end behavior risk model (velocity, amount spikes, decision drift)
 

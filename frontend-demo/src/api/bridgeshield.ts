@@ -5,7 +5,8 @@ import {
   EarnPortfolioResponse,
   EarnVaultDetailResponse,
   EarnVaultListResponse,
-  Stats
+  Stats,
+  TransferHistoryResponse
 } from '../types';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
@@ -308,4 +309,39 @@ export const buildCompliantComposerQuote = async (request: ComposerQuoteRequest)
   }
 
   return payload as ComposerQuoteResponse;
+};
+
+export interface TransferHistoryParams {
+  wallet: string;
+  status?: 'ALL' | 'PENDING' | 'DONE' | 'FAILED';
+  fromTime?: string;
+  toTime?: string;
+  limit?: number;
+  cursor?: string;
+}
+
+export const getTransferHistory = async (params: TransferHistoryParams): Promise<TransferHistoryResponse> => {
+  const signal = createTimeoutSignal(TIMEOUT);
+  const queryString = buildQueryString({
+    wallet: params.wallet,
+    status: params.status,
+    fromTime: params.fromTime,
+    toTime: params.toTime,
+    limit: params.limit,
+    cursor: params.cursor
+  });
+  
+  const response = await fetch(`${BASE_URL}/api/v1/analytics/transfers${queryString ? `?${queryString}` : ''}`, {
+    method: 'GET',
+    signal
+  });
+
+  const payload = await response.json().catch(() => ({}));
+  
+  if (!response.ok) {
+    const message = (payload as { message?: string }).message || `Analytics API error: ${response.status}`;
+    throw new Error(message);
+  }
+
+  return payload as TransferHistoryResponse;
 };

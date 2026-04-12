@@ -18,6 +18,7 @@ import adminRouter from './api/routes/admin';
 import earnRouter from './api/routes/earn';
 import composerRouter from './api/routes/composer';
 import behaviorRouter from './api/routes/behavior';
+import analyticsRouter from './api/routes/analytics';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -44,6 +45,7 @@ app.use(`/api/${API_VERSION}/admin`, adminRouter);
 app.use(`/api/${API_VERSION}/earn`, earnRouter);
 app.use(`/api/${API_VERSION}/composer`, composerRouter);
 app.use(`/api/${API_VERSION}/behavior`, behaviorRouter);
+app.use(`/api/${API_VERSION}/analytics`, analyticsRouter);
 
 app.get('/', (req, res) => {
   res.json({
@@ -59,7 +61,8 @@ app.get('/', (req, res) => {
       earnVaultDetail: `/api/${API_VERSION}/earn/vault/:network/:address`,
       earnPortfolio: `/api/${API_VERSION}/earn/portfolio/:wallet`,
       composerQuote: `/api/${API_VERSION}/composer/quote`,
-      behaviorProfile: `/api/${API_VERSION}/behavior/profile/:wallet`
+      behaviorProfile: `/api/${API_VERSION}/behavior/profile/:wallet`,
+      analyticsTransfers: `/api/${API_VERSION}/analytics/transfers`
     },
     documentation: 'https://docs.bridgeshield.io'
   });
