@@ -1,7 +1,7 @@
-# BridgeShield v0.0.0 完整工程设计文档
+# BridgeShield v0.0.6 完整工程设计文档
 
 > **项目**：BridgeShield — LI.FI 跨链交易 AML 入口检查系统  
-> **版本**：v0.0.0
+> **版本**：v0.0.6 
 > **文档状态**：工程执行版（含 Demo 前端）  
 > **目标读者**：开发团队、技术评审
 
@@ -127,9 +127,8 @@ bridgeshield/
 │   │   ├── mixer-addresses.json
 │   │   └── whitelist.json
 │   ├── prisma/
-│   │   ├── schema.sqlite.prisma      # 开发库
-│   │   └── schema.postgresql.prisma # 生产库
-│   ├── scripts/
+│   │   └── schema.prisma      # 统一schema文件，支持SQLite开发和PostgreSQL生产
+│   ├── scripts/              # 【规划中，暂未实现】风险数据自动更新脚本
 │   │   ├── update-risk-data.sh
 │   │   ├── parse-ofac.js
 │   │   └── sync-lifi-whitelist.js
@@ -487,6 +486,11 @@ async function checkMixerInteraction(address: string, chainId: number) {
 | 24h 内跨链 > 5 次 | **+15** | 链上频率分析 |
 | 单笔 > $100,000 | **+10** | 金额换算 |
 | 地址年龄 < 7 天 + 金额 > $10,000 | **+15** | 地址年龄分析 |
+| 与高风险地址发生跨链交易 | **+25** | LI.FI 历史交易数据分析 |
+| 首次使用 LI.FI 即进行大额交易 | **+15** | LI.FI 交易历史分析 |
+| 检测到跨链 tumbling 模式 | **+12** | LI.FI 多链交易行为分析 |
+| 交易金额远超历史平均水平 | **+10** | LI.FI 历史交易数据分析 |
+| 短时间内跨 ≥8 条不同链交易 | **+8** | LI.FI 多链交易行为分析 |
 
 #### C. 交易上下文因子
 
@@ -685,6 +689,28 @@ class RiskScorer {
   "version": "0.0.0"
 }
 ```
+
+### 7.5 LI.FI 扩展 API
+
+#### GET /api/v1/analytics/transfers
+**功能**：查询 LI.FI 跨链交易历史（人工调查端点），支持分页过滤，返回数据附带 BridgeShield 风险标记。
+**缓存**：15分钟内存缓存。
+
+#### GET /api/v1/behavior/profile/:wallet
+**功能**：生成 C 端钱包行为画像，返回异常风险信号（交易频率、链多样性、金额异动、决策漂移等）。
+
+#### GET /api/v1/earn/vaults
+**功能**：代理 LI.FI Earn Data API，获取可用 vault 列表，附带风险检测标记。
+
+#### GET /api/v1/earn/vault/:network/:address
+**功能**：代理 LI.FI Earn Data API，获取单个 vault 详情，验证合约地址风险。
+
+#### GET /api/v1/earn/portfolio/:wallet
+**功能**：代理 LI.FI Earn Data API，查询指定钱包的 Earn 持仓情况。
+
+#### GET /api/v1/composer/quote
+**功能**：AML 风控门控的 LI.FI Composer 报价接口，风险等级为 HIGH 时拦截报价请求，返回 BLOCK 决策；REVIEW 级允许请求但记录日志。
+**依赖**：需要配置 `COMPOSER_API_KEY` 环境变量。
 
 ---
 

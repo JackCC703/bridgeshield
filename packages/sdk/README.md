@@ -314,8 +314,3 @@ const client = new BridgeShieldClient({
 
 MIT License - see [LICENSE](LICENSE) for details.
 
-## Links
-
-- [Documentation](https://docs.bridgeshield.io)
-- [API Reference](https://api.bridgeshield.io/api/v1/docs)
-- [BridgeShield Website](https://bridgeshield.io)
