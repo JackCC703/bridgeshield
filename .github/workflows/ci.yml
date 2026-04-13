@@ -53,8 +53,8 @@ jobs:
 
       - run: npm ci
       - run: npm run build
-      - name: Skip frontend tests
-        run: "echo 'Frontend tests skipped in CI (run locally with npm test)'"
+      - name: frontend tests
+        run: npm run test
 
   frontend-admin:
     name: "Frontend Admin — Build & Test"
@@ -74,8 +74,8 @@ jobs:
 
       - run: npm ci
       - run: npm run build
-      - name: Skip frontend tests
-        run: "echo 'Frontend tests skipped in CI (run locally with npm test)'"
+      - name: frontend tests
+        run:  npm run test
 
   sdk:
     name: "SDK — Build & Test"
